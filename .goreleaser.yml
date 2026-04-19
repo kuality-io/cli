@@ -49,7 +49,7 @@ brews:
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     directory: Formula
     homepage: "https://kuality.io"
-    description: "Scan any website for accessibility, performance, SEO, security, and 30+ quality dimensions"
+    description: "Scan any website for accessibility, performance, SEO, cross-browser, and 30+ QA dimensions"
     license: "MIT"
     install: |
       bin.install "kuality"

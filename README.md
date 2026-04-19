@@ -1,6 +1,6 @@
 # Kuality CLI
 
-Scan any website for accessibility, performance, SEO, security, and 30+ quality dimensions — from your terminal.
+Scan any website for accessibility, performance, SEO, cross-browser, stress testing, and 30+ QA dimensions — from your terminal.
 
 ## Install
 
@@ -66,7 +66,7 @@ kuality scan example.com --format junit > results.xml
 | Performance | `performancebudget`, `assetaudit`, `bundlesize`, `ttfb`, `throttle`, `memoryleak` |
 | Mobile | `touchaudit`, `touchsize`, `orientation`, `pwa`, `mobilelighthouse` |
 | API testing | `contract`, `graphql`, `openapi` |
-| Security | `privacyscan`, `csp`, `cors` |
+| Web compliance | `privacyscan`, `csp`, `cors` |
 | Monitoring | `synthetic`, `cdnaudit` |
 
 ## CI/CD integration
