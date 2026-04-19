@@ -23,11 +23,13 @@ builds:
 
 archives:
   - id: default
-    format: tar.gz
+    formats:
+      - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
 
 checksum:
   name_template: "checksums.txt"
@@ -41,20 +43,17 @@ changelog:
       - "^ci:"
       - "^chore:"
 
-brews:
+homebrew_casks:
   - name: kuality
+    binaries:
+      - kuality
+    homepage: "https://kuality.io"
+    description: "Scan any website for accessibility, performance, SEO, cross-browser, and 30+ QA dimensions"
+    directory: Casks
     repository:
       owner: kuality-io
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    directory: Formula
-    homepage: "https://kuality.io"
-    description: "Scan any website for accessibility, performance, SEO, cross-browser, and 30+ QA dimensions"
-    license: "MIT"
-    install: |
-      bin.install "kuality"
-    test: |
-      system "#{bin}/kuality", "--version"
 
 release:
   github:
