@@ -1,6 +1,6 @@
 # Kuality CLI
 
-Scan any website for accessibility, performance, SEO, cross-browser, stress testing, and 30+ QA dimensions — from your terminal.
+Test any website for accessibility, performance, SEO, cross-browser, stress testing, and 30+ QA dimensions — from your terminal.
 
 ## Install
 
@@ -24,28 +24,28 @@ go install github.com/kuality-io/cli@latest
 # Authenticate with your API key (get one at https://kuality.io/settings/api-keys)
 kuality auth login
 
-# Run a scan
-kuality scan example.com
+# Run a test
+kuality test example.com
 
-# Run a specific scan type
-kuality scan example.com --type a11y
+# Run a specific test type
+kuality test example.com --type a11y
 
 # Fail CI if high-severity findings exist
-kuality scan example.com --type a11y --fail-on high
+kuality test example.com --type a11y --fail-on high
 
 # JSON output for scripting
-kuality scan example.com --format json
+kuality test example.com --format json
 
 # JUnit XML for CI test reporting
-kuality scan example.com --format junit > results.xml
+kuality test example.com --format junit > results.xml
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `kuality scan <url>` | Run a quality scan |
-| `kuality status <scan-id>` | Check scan status |
+| `kuality test <url>` | Run a quality test |
+| `kuality status <test-id>` | Check test status |
 | `kuality reports list` | List recent reports |
 | `kuality reports show <id>` | Show report details |
 | `kuality targets` | List configured targets |
@@ -54,9 +54,9 @@ kuality scan example.com --format junit > results.xml
 | `kuality auth status` | Check auth status |
 | `kuality auth logout` | Remove stored API key |
 
-## Scan types
+## Test types
 
-37 scan types across 8 categories:
+37 test types across 8 categories:
 
 | Category | Types |
 |----------|-------|
@@ -74,9 +74,9 @@ kuality scan example.com --format junit > results.xml
 ### GitHub Actions
 
 ```yaml
-- name: Quality scan
+- name: Quality test
   run: |
-    kuality scan ${{ vars.SITE_URL }} --type a11y --fail-on high --format junit > kuality-results.xml
+    kuality test ${{ vars.SITE_URL }} --type a11y --fail-on high --format junit > kuality-results.xml
 
 - name: Upload results
   uses: actions/upload-artifact@v4
@@ -88,9 +88,9 @@ kuality scan example.com --format junit > results.xml
 ### GitLab CI
 
 ```yaml
-quality_scan:
+quality_test:
   script:
-    - kuality scan $SITE_URL --type a11y --fail-on high --format junit > kuality-results.xml
+    - kuality test $SITE_URL --type a11y --fail-on high --format junit > kuality-results.xml
   artifacts:
     reports:
       junit: kuality-results.xml
@@ -100,7 +100,7 @@ quality_scan:
 
 ```bash
 export KUALITY_API_KEY="your-key"
-kuality scan example.com --type a11y --fail-on high --quiet
+kuality test example.com --type a11y --fail-on high --quiet
 ```
 
 Exit codes: `0` = pass, `1` = findings exceed `--fail-on` threshold.

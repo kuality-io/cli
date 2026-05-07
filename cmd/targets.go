@@ -12,7 +12,7 @@ import (
 var targetsCmd = &cobra.Command{
 	Use:   "targets",
 	Short: "List configured targets",
-	Long: `List all scan targets configured in your organization.
+	Long: `List all test targets configured in your organization.
 
 Examples:
   kuality targets

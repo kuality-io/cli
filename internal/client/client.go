@@ -111,23 +111,23 @@ func (c *Client) decodeResponse(resp *http.Response, target any) error {
 	return nil
 }
 
-// Scan types
+// Test types
 
-type CreateScanRequest struct {
+type CreateTestRequest struct {
 	Target   string `json:"target"`
-	ScanType string `json:"scan_type"`
+	TestType string `json:"scan_type"`
 }
 
-type ScanResponse struct {
-	ScanID   string `json:"scan_id"`
+type TestResponse struct {
+	TestID   string `json:"scan_id"`
 	ReportID string `json:"report_id"`
 	Status   string `json:"status"`
 	Target   string `json:"target"`
 	PollURL  string `json:"poll_url"`
 }
 
-type ScanStatus struct {
-	ScanID   string `json:"scan_id"`
+type TestStatus struct {
+	TestID   string `json:"scan_id"`
 	ReportID string `json:"report_id"`
 	Status   string `json:"status"`
 	State    string `json:"state"`
@@ -138,7 +138,7 @@ type Report struct {
 	ID          string          `json:"id"`
 	ReportID    string          `json:"report_id"`
 	Target      string          `json:"target"`
-	TypeOfScan  string          `json:"type_of_scan"`
+	TypeOfTest  string          `json:"type_of_scan"`
 	State       string          `json:"state"`
 	Score       json.Number     `json:"score"`
 	High        int             `json:"high"`
@@ -156,7 +156,7 @@ type Report struct {
 type ReportListItem struct {
 	ID         string      `json:"id"`
 	Target     string      `json:"target"`
-	TypeOfScan string      `json:"type_of_scan"`
+	TypeOfTest string      `json:"type_of_scan"`
 	State      string      `json:"state"`
 	Score      json.Number `json:"score"`
 	High       int         `json:"high"`
@@ -184,29 +184,29 @@ type GateResult struct {
 	Details string `json:"details"`
 }
 
-func (c *Client) CreateScan(target, scanType string) (*ScanResponse, error) {
-	resp, err := c.do("POST", "/api/v1/scans", &CreateScanRequest{
+func (c *Client) CreateTest(target, testType string) (*TestResponse, error) {
+	resp, err := c.do("POST", "/api/v1/scans", &CreateTestRequest{
 		Target:   target,
-		ScanType: scanType,
+		TestType: testType,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	var result ScanResponse
+	var result TestResponse
 	if err := c.decodeResponse(resp, &result); err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (c *Client) GetScanStatus(scanID string) (*ScanStatus, error) {
-	resp, err := c.do("GET", "/api/v1/scans/"+url.PathEscape(scanID), nil)
+func (c *Client) GetTestStatus(testID string) (*TestStatus, error) {
+	resp, err := c.do("GET", "/api/v1/scans/"+url.PathEscape(testID), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var result ScanStatus
+	var result TestStatus
 	if err := c.decodeResponse(resp, &result); err != nil {
 		return nil, err
 	}
@@ -241,11 +241,11 @@ func (c *Client) GetReportJUnit(reportID string) ([]byte, error) {
 	return io.ReadAll(io.LimitReader(resp.Body, 10*1024*1024))
 }
 
-func (c *Client) ListReports(scanType, target string) ([]ReportListItem, error) {
+func (c *Client) ListReports(testType, target string) ([]ReportListItem, error) {
 	path := "/api/v1/reports"
 	params := url.Values{}
-	if scanType != "" {
-		params.Set("scan_type", scanType)
+	if testType != "" {
+		params.Set("scan_type", testType)
 	}
 	if target != "" {
 		params.Set("target", target)

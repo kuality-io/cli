@@ -38,7 +38,7 @@ Examples:
 		}
 
 		if len(scores) == 0 {
-			fmt.Println("No scores available. Run a scan first.")
+			fmt.Println("No scores available. Run a test first.")
 			return nil
 		}
 

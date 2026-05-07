@@ -21,10 +21,10 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "kuality",
-	Short: "Kuality CLI — scan any site from your terminal",
-	Long: `Kuality CLI lets you run website quality scans from the command line.
+	Short: "Kuality CLI — test any site from your terminal",
+	Long: `Kuality CLI lets you run website quality tests from the command line.
 
-Scan for accessibility, performance, SEO, cross-browser compatibility,
+Test for accessibility, performance, SEO, cross-browser compatibility,
 and 30+ other quality dimensions. Integrate into CI/CD pipelines with exit codes
 and JUnit output.
 

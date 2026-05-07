@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var validScanTypes = []string{
+var validTestTypes = []string{
 	"a11y", "webvitals", "seo", "formaudit", "brokenlinks", "cookie",
 	"headers", "jsaudit", "tech", "cms", "api", "firefox", "webkit",
 	"uxaudit", "animation", "colorblind", "assets", "screenreader",
@@ -24,57 +24,57 @@ var validScanTypes = []string{
 }
 
 var (
-	flagScanType string
+	flagTestType string
 	flagFailOn   string
 	flagNoWait   bool
 	flagTimeout  int
 )
 
-var scanCmd = &cobra.Command{
-	Use:   "scan <url>",
-	Short: "Run a quality scan on a URL",
-	Long: `Run a scan against a URL and wait for results.
+var testCmd = &cobra.Command{
+	Use:   "test <url>",
+	Short: "Run a quality test on a URL",
+	Long: `Run a test against a URL and wait for results.
 
-By default, scans all quality dimensions. Use --type to run a
-specific scan type. Use --fail-on to set a severity threshold
+By default, tests all quality dimensions. Use --type to run a
+specific test type. Use --fail-on to set a severity threshold
 for non-zero exit codes (useful in CI/CD pipelines).
 
 Examples:
-  kuality scan example.com
-  kuality scan example.com --type a11y
-  kuality scan example.com --type a11y --fail-on high
-  kuality scan example.com --type seo --format json
-  kuality scan example.com --type webvitals --format junit
-  kuality scan example.com --no-wait`,
+  kuality test example.com
+  kuality test example.com --type a11y
+  kuality test example.com --type a11y --fail-on high
+  kuality test example.com --type seo --format json
+  kuality test example.com --type webvitals --format junit
+  kuality test example.com --no-wait`,
 	Args: cobra.ExactArgs(1),
-	RunE: runScan,
+	RunE: runTest,
 }
 
 func init() {
-	scanCmd.Flags().StringVarP(&flagScanType, "type", "t", "web", "Scan type (a11y, seo, webvitals, headers, ssl, ...)")
-	scanCmd.Flags().StringVar(&flagFailOn, "fail-on", "", "Exit non-zero if findings at this severity or above (high, medium, low)")
-	scanCmd.Flags().BoolVar(&flagNoWait, "no-wait", false, "Start scan and exit without waiting for results")
-	scanCmd.Flags().IntVar(&flagTimeout, "timeout", 600, "Maximum seconds to wait for scan completion")
+	testCmd.Flags().StringVarP(&flagTestType, "type", "t", "web", "Test type (a11y, seo, webvitals, headers, ssl, ...)")
+	testCmd.Flags().StringVar(&flagFailOn, "fail-on", "", "Exit non-zero if findings at this severity or above (high, medium, low)")
+	testCmd.Flags().BoolVar(&flagNoWait, "no-wait", false, "Start test and exit without waiting for results")
+	testCmd.Flags().IntVar(&flagTimeout, "timeout", 600, "Maximum seconds to wait for test completion")
 
-	scanCmd.RegisterFlagCompletionFunc("type", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return validScanTypes, cobra.ShellCompDirectiveNoFileComp
+	testCmd.RegisterFlagCompletionFunc("type", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return validTestTypes, cobra.ShellCompDirectiveNoFileComp
 	})
-	scanCmd.RegisterFlagCompletionFunc("fail-on", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	testCmd.RegisterFlagCompletionFunc("fail-on", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"high", "medium", "low"}, cobra.ShellCompDirectiveNoFileComp
 	})
 
-	rootCmd.AddCommand(scanCmd)
+	rootCmd.AddCommand(testCmd)
 }
 
-func runScan(cmd *cobra.Command, args []string) error {
+func runTest(cmd *cobra.Command, args []string) error {
 	target := args[0]
 
 	if flagFailOn != "" && flagFailOn != "high" && flagFailOn != "medium" && flagFailOn != "low" {
 		return fmt.Errorf("--fail-on must be one of: high, medium, low")
 	}
 
-	if !isValidScanType(flagScanType) {
-		return fmt.Errorf("unknown scan type %q. Run 'kuality scan --help' for valid types", flagScanType)
+	if !isValidTestType(flagTestType) {
+		return fmt.Errorf("unknown test type %q. Run 'kuality test --help' for valid types", flagTestType)
 	}
 
 	cfg, err := loadConfig()
@@ -88,27 +88,27 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	if !flagQuiet {
-		fmt.Printf("Starting %s scan on %s...\n", flagScanType, target)
+		fmt.Printf("Starting %s test on %s...\n", flagTestType, target)
 	}
 
-	scan, err := c.CreateScan(target, flagScanType)
+	test, err := c.CreateTest(target, flagTestType)
 	if err != nil {
-		return fmt.Errorf("failed to start scan: %w", err)
+		return fmt.Errorf("failed to start test: %w", err)
 	}
 
 	if !flagQuiet {
-		fmt.Printf("Scan started (ID: %s)\n", scan.ScanID)
+		fmt.Printf("Test started (ID: %s)\n", test.TestID)
 	}
 
 	if flagNoWait {
 		if flagFormat == "json" {
-			return output.JSON(os.Stdout, scan)
+			return output.JSON(os.Stdout, test)
 		}
-		fmt.Printf("Scan ID: %s\nPoll with: kuality status %s\n", scan.ScanID, scan.ScanID)
+		fmt.Printf("Test ID: %s\nPoll with: kuality status %s\n", test.TestID, test.TestID)
 		return nil
 	}
 
-	reportID, err := waitForScan(c, scan.ScanID, time.Duration(flagTimeout)*time.Second)
+	reportID, err := waitForTest(c, test.TestID, time.Duration(flagTimeout)*time.Second)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func runScan(cmd *cobra.Command, args []string) error {
 	}
 
 	if report.State == "failed" {
-		return fmt.Errorf("scan failed: %s", report.Error)
+		return fmt.Errorf("test failed: %s", report.Error)
 	}
 
 	switch flagFormat {
@@ -145,15 +145,15 @@ func runScan(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func waitForScan(c *client.Client, scanID string, timeout time.Duration) (string, error) {
+func waitForTest(c *client.Client, testID string, timeout time.Duration) (string, error) {
 	deadline := time.Now().Add(timeout)
 	spinner := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
 	i := 0
 
 	for time.Now().Before(deadline) {
-		status, err := c.GetScanStatus(scanID)
+		status, err := c.GetTestStatus(testID)
 		if err != nil {
-			return "", fmt.Errorf("failed to check scan status: %w", err)
+			return "", fmt.Errorf("failed to check test status: %w", err)
 		}
 
 		state := status.Status
@@ -165,7 +165,7 @@ func waitForScan(c *client.Client, scanID string, timeout time.Duration) (string
 		case "completed":
 			if !flagQuiet {
 				fmt.Print("\r\033[K")
-				fmt.Println("Scan completed.")
+				fmt.Println("Test completed.")
 			}
 			return status.ReportID, nil
 		case "failed":
@@ -176,20 +176,20 @@ func waitForScan(c *client.Client, scanID string, timeout time.Duration) (string
 		}
 
 		if !flagQuiet {
-			fmt.Printf("\r\033[K%s Scanning... (%s)", spinner[i%len(spinner)], state)
+			fmt.Printf("\r\033[K%s Testing... (%s)", spinner[i%len(spinner)], state)
 			i++
 		}
 
 		time.Sleep(3 * time.Second)
 	}
 
-	return "", fmt.Errorf("scan timed out after %s. Check status with: kuality status %s", timeout, scanID)
+	return "", fmt.Errorf("test timed out after %s. Check status with: kuality status %s", timeout, testID)
 }
 
 func printReport(r *client.Report) {
 	fmt.Println()
 	fmt.Printf("  Target:     %s\n", r.Target)
-	fmt.Printf("  Scan type:  %s\n", r.TypeOfScan)
+	fmt.Printf("  Test type:  %s\n", r.TypeOfTest)
 	fmt.Printf("  Score:      %s\n", r.Score)
 	fmt.Printf("  Status:     %s %s\n", output.StatusIcon(r.State), r.State)
 	fmt.Println()
@@ -223,8 +223,8 @@ func checkThreshold(r *client.Report, failOn string) error {
 	return nil
 }
 
-func isValidScanType(t string) bool {
-	for _, v := range validScanTypes {
+func isValidTestType(t string) bool {
+	for _, v := range validTestTypes {
 		if v == t {
 			return true
 		}

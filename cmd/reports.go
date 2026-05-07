@@ -16,13 +16,13 @@ var (
 
 var reportsCmd = &cobra.Command{
 	Use:   "reports",
-	Short: "View scan reports",
+	Short: "View test reports",
 }
 
 var reportsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List recent reports",
-	Long: `List recent scan reports for your organization.
+	Long: `List recent test reports for your organization.
 
 Examples:
   kuality reports list
@@ -64,7 +64,7 @@ Examples:
 			rows[i] = []string{
 				id,
 				r.Target,
-				r.TypeOfScan,
+				r.TypeOfTest,
 				fmt.Sprintf("%s %s", output.StatusIcon(r.State), r.State),
 				r.Score.String(),
 				output.SeverityColor("high", r.High),
@@ -80,7 +80,7 @@ Examples:
 var reportsShowCmd = &cobra.Command{
 	Use:   "show <report-id>",
 	Short: "Show detailed report",
-	Long: `Show the full details of a scan report.
+	Long: `Show the full details of a test report.
 
 Examples:
   kuality reports show abc123
@@ -119,7 +119,7 @@ Examples:
 		fmt.Println()
 		fmt.Printf("  Report ID:  %s\n", report.ID)
 		fmt.Printf("  Target:     %s\n", report.Target)
-		fmt.Printf("  Scan type:  %s\n", report.TypeOfScan)
+		fmt.Printf("  Test type:  %s\n", report.TypeOfTest)
 		fmt.Printf("  Score:      %s\n", report.Score)
 		fmt.Printf("  Status:     %s %s\n", output.StatusIcon(report.State), report.State)
 		if report.StartDate != "" {
@@ -149,7 +149,7 @@ Examples:
 }
 
 func init() {
-	reportsListCmd.Flags().StringVarP(&flagReportType, "type", "t", "", "Filter by scan type")
+	reportsListCmd.Flags().StringVarP(&flagReportType, "type", "t", "", "Filter by test type")
 	reportsListCmd.Flags().StringVar(&flagReportTarget, "target", "", "Filter by target URL")
 
 	reportsCmd.AddCommand(reportsListCmd)
